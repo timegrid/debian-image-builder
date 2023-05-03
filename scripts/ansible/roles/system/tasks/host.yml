@@ -1,0 +1,12 @@
+---
+# set hostname
+- name: set hostname
+  hostname:
+    name: "{{ system_hostname }}"
+
+# write /etc/hosts
+- name: write /etc/hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    mode: "0644"

@@ -1,0 +1,13 @@
+# IPv4
+127.0.0.1	localhost
+{{ system_public_ipv4 }}	{{ ansible_fqdn }} {{ ansible_hostname }}
+{% if system_fqdn_aliases is defined and (system_fqdn_aliases | length > 0) %}
+{% for alias in system_fqdn_aliases %}
+{{ system_public_ipv4 }}	{{ alias }}
+{% endfor %}
+{% endif %}
+
+# IPv6
+::1		localhost ip6-localhost ip6-loopback
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters

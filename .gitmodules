@@ -1,0 +1,6 @@
+[submodule "scripts/debuerreotype/upstream"]
+	path = scripts/debuerreotype/upstream
+	url = https://github.com/debuerreotype/debuerreotype
+[submodule "scripts/debootstrap/upstream"]
+	path = scripts/debootstrap/upstream
+	url = https://salsa.debian.org/installer-team/debootstrap.git

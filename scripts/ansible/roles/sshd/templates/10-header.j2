@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+import os
+
+
+hostname = "{{ ansible_hostname }}"
+quoted = hostname.title()
+filename_logo = "/etc/motd.logo"
+filename_stage = "/etc/stage"
+stage = False
+if os.path.isfile(filename_stage):
+    with open(filename_stage) as f:
+        stage = f.read()
+
+
+class text:
+    red = "\033[1;31m"
+    green = "\033[0;32m"
+    yellow = "\033[1;33m"
+    blue = "\033[1;34m"
+    magenta = "\033[1;35m"
+    cyan = "\033[1;36m"
+    white = "\033[1;37m"
+    bold = "\033[;1m"
+    reverse = "\033[;7m"
+    reset = "\033[0;0m"
+
+
+# Logo
+
+width = 50
+with open(filename_logo) as f:
+    logo = f.read()
+    logo = logo.replace(
+        "X" * width,
+        "".join([
+            text.bold,
+            hostname.upper().center(width),
+            text.reset,
+            text.yellow
+        ])
+    )
+    if stage:
+        logo = logo.replace(
+            "Y" * width,
+            "".join([
+                (text.green if stage == "development" else text.red),
+                stage.lower().center(width),
+                text.reset,
+                text.yellow
+            ])
+        )
+    else:
+        logo = logo.replace(
+            "Y" * width,
+            " " * width
+        )
+    output_logo = "".join([
+        "\n",
+        text.yellow,
+        logo,
+        text.reset
+    ])
+
+print(output_logo)

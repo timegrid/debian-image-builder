@@ -1,0 +1,5 @@
+auto enp1s0
+iface enp1s0 inet static
+    address <ADDRESS>/24
+    gateway <GATEWAY>
+

@@ -1,0 +1,8 @@
+---
+- name: provision a debian base image
+  hosts: all
+  roles:
+    - role: system
+      tags: ['setup', 'system']
+    - role: sshd
+      tags: ['setup', 'sshd']

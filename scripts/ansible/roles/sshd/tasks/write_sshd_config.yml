@@ -1,0 +1,13 @@
+---
+# write sshd_config
+- name: write sshd_config
+  template:
+    src:  sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    mode: 0600
+  register: write_sshd_config
+  notify: restart sshd
+
+# force restart of sshd
+- name: force restart of sshd
+  meta: flush_handlers

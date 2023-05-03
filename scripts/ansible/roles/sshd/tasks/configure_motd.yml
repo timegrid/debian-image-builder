@@ -1,0 +1,29 @@
+---
+# delete standard motd files
+- name: delete standard motd files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/update-motd.d/10-uname
+    - /etc/motd
+
+# copy new motd files
+- name: copy new motd files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - src: motd.logo.j2
+      dest: /etc/motd.logo
+      mode: "0655"
+    - src: 10-header.j2
+      dest: /etc/update-motd.d/10-header
+      mode: "0755"
+    - src: 20-sysinfo.j2
+      dest: /etc/update-motd.d/20-sysinfo
+      mode: "0755"
+    - src: 30-diskspace.j2
+      dest: /etc/update-motd.d/30-diskspace
+      mode: "0755"

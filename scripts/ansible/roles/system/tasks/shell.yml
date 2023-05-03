@@ -1,0 +1,38 @@
+---
+# zsh
+- name: change root user shell
+  user:
+    name: root
+    shell: /bin/zsh
+
+# zsh grml config
+- name: add root grml zsh config
+  get_url:
+    url: https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+    dest: /root/.zshrc
+    owner: root
+    group: root
+- name: add admin grml zsh config
+  get_url:
+    url: https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+    dest: "/home/{{ item.name }}/.zshrc"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+  with_items: "{{ system_admin_users }}"
+  no_log: true
+
+# zsh local config
+- name: configure root zsh
+  template:
+    src: zshrc.local.j2
+    dest: /root/.zshrc.local
+    owner: root
+    group: root
+- name: configure admin zsh
+  template:
+    src: zshrc.local.j2
+    dest: "/home/{{ item.name }}/.zshrc.local"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+  with_items: "{{ system_admin_users }}"
+  no_log: true

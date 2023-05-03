@@ -1,0 +1,51 @@
+---
+sshd_service: ssh
+
+sshd_port: 22
+sshd_address_family: "any"
+sshd_listen_addresses:
+  - "0.0.0.0"
+  - "::"
+
+sshd_pubkey_authentication: "yes"
+sshd_password_authentication: "no"
+sshd_kdb_interactive_authentication: "no"
+sshd_challenge_response_authentication: "no"
+sshd_kerberos_authentication: "no"
+sshd_gssapi_authentication: "no"
+sshd_hostbased_authentication: "no"
+
+sshd_allow_agent_forwarding: "yes"
+sshd_allow_tcp_forwarding: "yes"
+sshd_x11_forwarding: "no"
+sshd_gateway_ports: "no"
+
+sshd_permit_root_login: "prohibit-password"
+sshd_permit_tunnel: "no"
+sshd_permit_empty_passwords: "no"
+sshd_permit_tty: "yes"
+sshd_permit_user_environment: "no"
+sshd_accept_env: "LANG LC_*"
+
+sshd_allow_users: []
+sshd_use_pam: "yes"
+sshd_use_dns: "no"
+
+sshd_authorized_keys_file: ".ssh/authorized_keys"
+sshd_authorized_keys_command: "none"
+sshd_authorized_keys_command_user: "nobody"
+sshd_authorized_principals_file: "none"
+
+sshd_login_grace_time: "2m"
+sshd_strict_modes: "yes"
+sshd_max_auth_tries: 6
+sshd_max_sessions: 10
+sshd_rekey_limit: "default none"
+
+sshd_subsystem: "sftp /usr/lib/openssh/sftp-server"
+
+sshd_print_motd: "no"
+sshd_print_last_log: "no"
+
+sshd_syslog_facility: "AUTH"
+sshd_log_level: "INFO"

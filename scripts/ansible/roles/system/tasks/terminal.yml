@@ -1,0 +1,17 @@
+---
+# copy terminfo files
+- name: copy terminfo files
+  copy:
+    src: "{{ item }}"
+    dest: "/root/.{{ item }}"
+    mode: "0644"
+  with_items:
+    - terminfo.alacritty
+
+# install terminfo files
+- name: install terminfo files
+  shell: tic -x /root/.{{ item }} && touch /root/.{{ item }}.imported
+  args:
+    creates: /root/.{{ item }}.imported
+  with_items:
+    - terminfo.alacritty

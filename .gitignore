@@ -1,0 +1,27 @@
+# debootstrap
+scripts/debootstrap/builds
+scripts/debootstrap/cache
+scripts/debootstrap/keyrings/*
+!scripts/debootstrap/keyrings/*.sha512
+!scripts/debootstrap/keyrings/*.gpg
+!scripts/debootstrap/keyrings/*.dsc
+
+# apt-cacher-ng
+scripts/apt-cacher-ng/cache
+scripts/apt-cacher-ng/log
+
+# debuerreotype
+scripts/debuerreotype/builds
+
+# libvirt
+scripts/libvirt/pool
+scripts/libvirt/image
+scripts/libvirt/xml
+
+# docs
+docs/*
+!docs/style.css
+!docs/build.sh
+
+# notes
+.tmp

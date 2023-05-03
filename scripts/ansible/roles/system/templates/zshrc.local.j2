@@ -1,0 +1,87 @@
+SAVEHIST=100000
+
+### zsh plugins
+
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main pattern)
+ZSH_HIGHLIGHT_PATTERNS=('rm -rf *' 'fg=white,bold,bg=red')
+
+source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=240'
+
+source /usr/share/doc/fzf/examples/key-bindings.zsh
+source /usr/share/doc/fzf/examples/completion.zsh
+
+### directory stack
+
+setopt CDABLE_VARS  # cd -#/...
+setopt PUSHD_MINUS  # cd +/- switch
+zstyle ':completion:*:directory-stack' list-colors '=(#b) #([0-9]#)*( *)==95=38;5;12'
+
+
+### prompt stage tag
+
+{% if system_stage == "development" -%}
+zstyle ':prompt:grml:*:items:host' post '%K%F{green}DEV%f%k '
+{% endif %}
+{% if system_stage == "staging" -%}
+zstyle ':prompt:grml:*:items:host' post '%B%K%F{yellow}PRO%f%k%b '
+{% endif %}
+{% if system_stage == "production" -%}
+zstyle ':prompt:grml:*:items:host' post '%B%K%F{red}PRO%f%k%b '
+{% endif %}
+
+
+### jumps via Alt/Strg + Left/Right/Backspace
+
+# default "*?_-.[]~=/&;!#$%^(){}<>"
+SUBWORDCHARS="*?.[]~=/&;!#$%^(){}<>"
+DIRWORDCHARS="*?._-[]~=&;!#$%^(){}<>"
+
+# Strg+Backspace
+backward-kill-dir () {
+    local WORDCHARS=$DIRWORDCHARS
+    zle backward-kill-word
+}
+zle -N backward-kill-dir
+bindkey '^H' backward-kill-dir
+
+# Strg+Left
+backward-word-dir () {
+    local WORDCHARS=$DIRWORDCHARS
+    zle backward-word
+}
+zle -N backward-word-dir
+bindkey "^[[1;5D" backward-word-dir
+
+# Strg+Right
+forward-word-dir () {
+    local WORDCHARS=$DIRWORDCHARS
+    zle forward-word
+}
+zle -N forward-word-dir
+bindkey "^[[1;5C" forward-word-dir
+
+# Alt+Backspace
+backward-kill-subword () {
+    local WORDCHARS=$SUBWORDCHARS
+    zle backward-kill-word
+}
+zle -N backward-kill-subword
+bindkey '^[^?' backward-kill-subword
+
+# Alt+Left
+backward-word-subword () {
+    local WORDCHARS=$SUBWORDCHARS
+    zle backward-word
+}
+zle -N backward-word-subword
+bindkey "^[[1;3D" backward-word-subword
+
+# Alt+Right
+forward-word-subword () {
+    local WORDCHARS=$SUBWORDCHARS
+    zle forward-word
+}
+zle -N forward-word-subword
+bindkey "^[[1;3C" forward-word-subword

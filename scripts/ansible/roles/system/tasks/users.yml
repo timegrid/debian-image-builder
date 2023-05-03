@@ -1,0 +1,40 @@
+---
+# groups
+- name: add admin groups
+  group:
+    gid: "{{ item.gid }}"
+    name: "{{ item.name }}"
+  with_items: "{{ system_admin_users }}"
+  no_log: true
+
+# users
+- name: add admin users
+  user:
+    uid: "{{ item.uid }}"
+    name: "{{ item.name }}"
+    group: "{{ item.name }}"
+    groups:
+      - sudo
+    shell: "{{ item.shell }}"
+    password: "{{ item.password }}"
+  with_items: "{{ system_admin_users }}"
+  no_log: true
+
+# sudo
+- name: omit sudo password (development only)
+  lineinfile:
+    path: /etc/sudoers.d/development
+    create: yes
+    line: "{{ item.name }} ALL=(ALL) NOPASSWD: ALL"
+  with_items: "{{ system_admin_users }}"
+  no_log: true
+  when: system_stage == "development"
+
+# ssh
+- name: add admin ssh keys
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ lookup('file', item.ssh_key) }}"
+    exclusive: true
+  with_items: "{{ system_admin_users }}"
+  no_log: true

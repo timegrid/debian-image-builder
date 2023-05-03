@@ -1,0 +1,62 @@
+---
+# proxy
+- name: delete apt proxy configuration file
+  file:
+    path: /etc/apt/apt.conf.d/proxy
+    state: absent
+  when: not system_apt_proxy
+  tags: ['upgrade']
+
+- name: create apt proxy configuration file
+  template:
+    src: apt.conf.d/proxy.j2
+    dest: /etc/apt/apt.conf.d/proxy
+    mode: 0600
+  when: system_apt_proxy
+  tags: ['upgrade']
+
+# update
+- name: update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: system_apt_update
+  tags: ['upgrade']
+
+# upgrade
+- name: upgrade packages
+  apt:
+    upgrade: "{{ system_apt_upgrade_mode }}"
+  when: system_apt_upgrade
+  register: apt_upgrade_output
+  tags: ['never', 'upgrade']
+
+# reboot
+- name: reboot machine
+  reboot:
+    msg: "reboot scheduled by ansible"
+  when: >
+    "reboot" in ansible_run_tags or
+    (
+      system_apt_reboot
+      and apt_upgrade_output.stdout is defined
+      and (
+        "Setting up linux-image-amd64" in apt_upgrade_output.stdout
+        or "grub-pc: Running grub-install" in apt_upgrade_output.stdout
+      )
+    )
+  tags: ['never', 'upgrade', 'reboot']
+
+# install
+- name: install packages
+  apt:
+    name: "{{ system_apt_install }}"
+    state: present
+
+# remove
+- name: remove packages
+  apt:
+    name: "{{ system_apt_remove }}"
+    state: absent
+    autoremove: yes
+    purge: yes

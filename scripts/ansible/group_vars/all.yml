@@ -1,0 +1,5 @@
+---
+sshd_allow_users: "{{ system_admin_users | map(attribute='name') | list }}"
+system_apt_proxy: true
+system_apt_upgrade: true
+system_apt_reboot: true

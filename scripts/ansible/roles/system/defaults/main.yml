@@ -1,0 +1,36 @@
+---
+system_stage: "development"
+
+system_hostname: "{{ inventory_hostname }}"
+system_public_ipv4: "{{ ansible_default_ipv4.address }}"
+system_public_ipv4_gateway: "{{ system_public_ipv4.split('.')[0:3] | join('.') }}.1"
+system_fqdn: "{{ ansible_fqdn }}"
+system_fqdn_aliases: []
+
+system_lang: en_US.UTF-8
+system_timezone: Europe/Berlin
+
+system_admin_users:
+  - name: admin
+    uid: 1000
+    gid: 1000
+    password: "$1$bVim799q$48FCXm1UWOOqT9aC9tAN2."  # password
+    ssh_key: keys/admin.pub
+    shell: /bin/zsh
+
+system_apt_proxy: false
+system_apt_update: true
+system_apt_upgrade: false
+system_apt_reboot: false
+system_apt_proxy_url: "http://{{ system_public_ipv4_gateway }}:3142"
+system_apt_upgrade_mode: dist
+system_apt_install:
+  - fzf
+  - htop
+  - locales
+  - sudo
+  - vim-nox
+  - zsh
+  - zsh-syntax-highlighting
+  - zsh-autosuggestions
+system_apt_remove: []

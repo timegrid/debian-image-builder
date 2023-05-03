@@ -1,0 +1,15 @@
+---
+# configure environment
+- name: write stage to /etc/environment
+  lineinfile:
+    path: /etc/environment
+    regexp: "^STAGE="
+    line: "STAGE={{ system_stage }}"
+  become: yes
+- name: write stage to /etc/stage
+  copy:
+    content: "{{ system_stage }}"
+    dest: /etc/stage
+    mode: "0655"
+  become: yes
+

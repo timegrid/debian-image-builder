@@ -1,0 +1,12 @@
+--- debian.sh	2023-03-22 12:26:15.865784261 +0100
++++ debian.patch.sh	2023-03-22 12:36:14.355876419 +0100
+@@ -360,6 +360,9 @@
+ 			--exclude './etc/apt/apt.conf.d/debuerreotype-gpgv-ignore-expiration'
+ 		)
+ 	fi
++	tarArgs+=(
++		--exclude './etc/ssh/ssh_host_*_key*'
++	)
+ 
+ 	debuerreotype-tar "${tarArgs[@]}" "$rootfs" "$targetBase.tar.xz"
+ 	du -hsx "$targetBase.tar.xz"

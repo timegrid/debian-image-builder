@@ -1,0 +1,32 @@
+---
+# configure interfaces
+- name: configure static interfaces
+  template:
+    src: interfaces.d/static.j2
+    dest: /etc/network/interfaces.d/static
+    mode: 0600
+  register: configure_interfaces_output
+
+# restart network service
+- name: async restart of networking.service
+  shell: "sleep 1; systemctl restart networking.service &"
+  args:
+    executable: /bin/bash
+  async: 100
+  poll: 0
+  when: configure_interfaces_output.changed
+
+- name: set fact for current IP
+  set_fact:
+    ansible_host: "{{ system_public_ipv4 }}"
+  when: configure_interfaces_output.changed
+
+- name: wait for ssh connectivity
+  local_action:
+    module: wait_for
+    host: "{{ ansible_host }}"
+    port: 22
+    delay: 10
+    state: started
+  when: configure_interfaces_output.changed
+  register: network_responding
