@@ -49,7 +49,7 @@ pool="develop"
 # Interface
 ipRange="${ip%.*}"
 gateway="${ip%.*}.1"
-interface="$libvirtDir/interface/static"
+interface="static"
 
 # Ansible
 export ANSIBLE_CONFIG="$ansibleDir/ansible.cfg"
