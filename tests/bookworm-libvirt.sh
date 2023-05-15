@@ -35,16 +35,11 @@ suite="bookworm"
 network="debian"
 domain="bookworm-libvirt.test"
 sshdKeys="$libvirtDir/ssh"
-ip="192.168.100.102"
+ip="192.168.100.102/24"
 
 # Interface
-ipRange="${ip%.*}"
-gateway="${ip%.*}.1"
-if $dhcp; then
-    interface="$libvirtDir/interface/dhcp"
-else
-    interface="$libvirtDir/interface/static"
-fi
+interface="static"
+if $dhcp; then interface="dhcp"; fi
 
 
 #------------------------------------------------------------------------------
@@ -53,17 +48,12 @@ fi
 
 if ! virsh dominfo "$domain" &> /dev/null; then
     buildArgs=(
-        --network-ip-range "$ipRange"
-        --domain-name "$domain"
+        --network-ip4-net  "$ip"
+        --domain-name      "$domain"
         --domain-sshd-keys "$sshdKeys"
         --domain-interface "$interface"
     )
-    if ! $dhcp; then
-        buildArgs+=(
-            --domain-ip      "$ip"
-            --domain-gateway "$gateway"
-        )
-    fi
+    if ! $dhcp; then buildArgs+=( --domain-ip4 "$ip"); fi
     "$libvirtDir/build.sh" "${buildArgs[@]}" "$suite"
 fi
 

@@ -177,31 +177,36 @@ if [ -z $keyring ]; then
         info "package already extracted"
     else
         tar -xf "$package.tar.xz"
+        if [ -d "$keyringDir/debian-archive-keyring" ]; then
+            mv "$keyringDir/debian-archive-keyring" $packageDir
+        fi
     fi
     success
 
-    #%% Verify keyring signature (remote sha256sum)
-    title "Veryify keyring signature (remote sha256sum)"
-    checksum="$(shasum_file "$keyring.asc" 256 "")"
-    request="$packageApi/sha256/?checksum=$checksum&package=$keyringName"
-    response="$packageDir.$keyringName.asc.sha256.json"
-    info "signature file" "$keyring.asc"
-    info "api request" "$request"
-    if [ -f "$response" ]; then
-        info "sha256sum already fetched"
-    else
-        wget -qO "$response" "$request"
-    fi
-    responseCount=$(grep -oP '(?<="count":).*?(?=,)' "$response" | head -1)
-    responseVersions=($(grep -oP '(?<="version":").*?(?=")' "$response"))
-    info "api results" "$responseCount"
-    if [ "$responseCount" -eq 0 ]; then
-        [ -f "$response" ] && cat "$response" && rm "$response"
-        error "keyring signature file not found"
-    fi
-    info "api versions" "${responseVersions[@]}"
-    grep -q "$version" <<< "${responseVersions[*]}" || error "keyring signature verification failed"
-    success
+    #-%% Verify keyring signature (remote sha256sum)
+    ### api not stable
+    # title "Veryify keyring signature (remote sha256sum)"
+    # checksum="$(shasum_file "$keyring.asc" 256 "")"
+    # request="$packageApi/sha256/?checksum=$checksum&package=$keyringName"
+    # response="$packageDir.$keyringName.asc.sha256.json"
+    # info "signature file" "$keyring.asc"
+    # info "api request" "$request"
+    # if [ -f "$response" ]; then
+    #     info "sha256sum already fetched"
+    # else
+    #     wget -qO "$response" "$request"
+    # fi
+    # responseCount=$(grep -oP '(?<="count":).*?(?=,)' "$response" | head -1)
+    # responseVersions=($(grep -oP '(?<="version":").*?(?=")' "$response"))
+    # info "api results" "$responseCount"
+    # if [ "$responseCount" -eq 0 ]; then
+    #     [ -f "$response" ] && cat "$response" && rm "$response"
+    #     error "keyring signature file not found"
+    # fi
+    # info "api versions" "${responseVersions[@]}"
+    # grep -q "$version" <<< "${responseVersions[*]}" \
+    #     || error "keyring signature verification failed"
+    # success
 
     #%% Generate keyring (implies signature tests of package)
     title "Generate keyring"

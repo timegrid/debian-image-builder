@@ -29,14 +29,17 @@
 #%       --domain-keyboard=LAYOUT  keyboard layout (default: 'de')
 #%       --domain-interface=PATH   path to / name of interface configuration file
 #%                                   (default: 'dhcp')
-#%       --domain-ip=IP            ip of the domain (default: dhcp)
-#%       --domain-gateway=IP       gateway for the domain (default: dhcp)
+#%       --domain-ip4=IP           ip of the domain (default: EMPTPY -> dhcp)
+#%       --domain-ip4-gateway=IP   gateway for the domain (default: EMPTY -> dhcp)
+#%       --domain-ip6=IP           ip of the domain (default: EMPTPY -> dhcp)
+#%       --domain-ip6-gateway=IP   gateway for the domain (default: EMPTY -> dhcp)
 #%
 #% Net Options:
 #%   -n, --network-name=NAME       name of the net (default: 'debian')
 #%       --network-uuid=UUID       uuid of network (default: random)
-#%       --network-ip-range=IP     ip range of the network (default: 192.168.100)
 #%       --network-mac=MAC         mac of the interface (default: random)
+#%       --network-ip4-net=IP      ip4 net (default: '192.168.100.0/24')
+#%       --network-ip6-net=IP      ip4 net (default: 'fd00:d1b::/64')
 #%       --xml-dir=PATH            directory of the xml configuration
 #%                                   (default: './xml')
 #%
@@ -71,12 +74,15 @@ long=(
     domain-timezone:
     domain-keyboard:
     domain-interface:
-    domain-ip:
-    domain-gateway:
+    domain-ip4:
+    domain-ip4-gateway:
+    domain-ip6:
+    domain-ip6-gateway:
     network-name:
     network-uuid:
-    network-ip-range:
     network-mac:
+    network-ip4-net:
+    network-ip6-net:
     xml-dir
     pool-name:
     pool-dir:
@@ -113,14 +119,17 @@ domainSshdKeys=
 domainTimezone="Europe/Berlin"
 domainKeyboard="de"
 domainInterface="$libvirtDir/interface/dhcp"
-domainIp=
-domainGateway=
+domainIp4=
+domainIp4Gateway=
+domainIp6=
+domainIp6Gateway=
 
 networkName=debian
 networkUuid="$(uuidgen)"
 networkMac="$(od -An -N6 -tx1 /dev/urandom \
     | sed -e 's/^  *//' -e 's/  */:/g' -e 's/:$//' -e 's/^\(.\)[13579bdf]/\10/')"
-networkIpRange=
+networkIp4Net=
+networkIp6Net=
 xmlDir="$scriptDir/xml"
 
 poolName=debian
@@ -137,42 +146,45 @@ volumeName=
 while true; do
     case "$1" in
        # domain
-       -d | --domain-name)       domainName="$2"      ; shift 2 ;;
-            --domain-cpus)       domainCpus="$2"      ; shift 2 ;;
-            --domain-memory)     domainMemory="$2"    ; shift 2 ;;
-            --domain-os-variant) domainOsVariant="$2" ; shift 2 ;;
+       -d | --domain-name)        domainName="$2"       ; shift 2 ;;
+            --domain-cpus)        domainCpus="$2"       ; shift 2 ;;
+            --domain-memory)      domainMemory="$2"     ; shift 2 ;;
+            --domain-os-variant)  domainOsVariant="$2"  ; shift 2 ;;
 
-            --domain-hostname)   domainHostname="$2"  ; shift 2 ;;
-            --domain-password)   domainPassword="$2"  ; shift 2 ;;
-            --domain-ssh-key)    domainSshKey="$2"    ; shift 2 ;;
-            --domain-sshd-keys)  domainSshdKeys="$2"  ; shift 2 ;;
-            --domain-timezone)   domainTimezone="$2"  ; shift 2 ;;
-            --domain-keyboard)   domainKeyboard="$2"  ; shift 2 ;;
-            --domain-interface)  domainInterface="$2" ; shift 2 ;;
-            --domain-ip)         domainIp="$2"        ; shift 2 ;;
-            --domain-gateway)    domainGateway="$2"   ; shift 2 ;;
+            --domain-hostname)    domainHostname="$2"   ; shift 2 ;;
+            --domain-password)    domainPassword="$2"   ; shift 2 ;;
+            --domain-ssh-key)     domainSshKey="$2"     ; shift 2 ;;
+            --domain-sshd-keys)   domainSshdKeys="$2"   ; shift 2 ;;
+            --domain-timezone)    domainTimezone="$2"   ; shift 2 ;;
+            --domain-keyboard)    domainKeyboard="$2"   ; shift 2 ;;
+            --domain-interface)   domainInterface="$2"  ; shift 2 ;;
+            --domain-ip4)         domainIp4="$2"        ; shift 2 ;;
+            --domain-ip4-gateway) domainIp4Gateway="$2" ; shift 2 ;;
+            --domain-ip6)         domainIp6="$2"        ; shift 2 ;;
+            --domain-ip6-gateway) domainIp6Gateway="$2" ; shift 2 ;;
 
        # net
-       -n | --network-name)      networkName="$2"     ; shift 2 ;;
-            --network-uuid)      networkUuid="$2"     ; shift 2 ;;
-            --network-mac)       networkMac="$2"      ; shift 2 ;;
-            --network-ip-range)  networkIpRange="$2"  ; shift 2 ;;
-            --xml-dir)           xmlDir="$2"          ; shift 2 ;;
+       -n | --network-name)       networkName="$2"      ; shift 2 ;;
+            --network-uuid)       networkUuid="$2"      ; shift 2 ;;
+            --network-mac)        networkMac="$2"       ; shift 2 ;;
+            --network-ip4-net)    networkIp4Net="$2"    ; shift 2 ;;
+            --network-ip6-net)    networkIp6Net="$2"    ; shift 2 ;;
+            --xml-dir)            xmlDir="$2"           ; shift 2 ;;
 
        # pool
-       -p | --pool-name)         poolName="$2"        ; shift 2 ;;
-            --pool-dir)          poolDir="$2"         ; shift 2 ;;
+       -p | --pool-name)          poolName="$2"         ; shift 2 ;;
+            --pool-dir)           poolDir="$2"          ; shift 2 ;;
 
        # image
-       -i | --image-name)        imageName="$2"       ; shift 2 ;;
-            --image-format)      imageFormat="$2"     ; shift 2 ;;
-            --image-size)        imageSize="$2"       ; shift 2 ;;
-            --image-lvm-path)    imageLvmPath="$2"    ; shift 2 ;;
-            --image-type)        imageType="$2"       ; shift 2 ;;
-            --image-dir)         imageDir="$2"        ; shift 2 ;;
+       -i | --image-name)         imageName="$2"        ; shift 2 ;;
+            --image-format)       imageFormat="$2"      ; shift 2 ;;
+            --image-size)         imageSize="$2"        ; shift 2 ;;
+            --image-lvm-path)     imageLvmPath="$2"     ; shift 2 ;;
+            --image-type)         imageType="$2"        ; shift 2 ;;
+            --image-dir)          imageDir="$2"         ; shift 2 ;;
 
        # volume
-       -V | --volume-name)       volumeName="$2"      ; shift 2 ;;
+       -V | --volume-name)        volumeName="$2"       ; shift 2 ;;
 
        --) shift; break ;;
        *)  usage "ERROR: unknown flag '$1'." 1 ;;
@@ -186,15 +198,8 @@ suite="${1:-}"; shift || usage "missing argument: suite" 1
 domainName="${domainName:-"$suite"}"
 imageName="${imageName:-"$domainName"}"
 volumeName="${volumeName:-"$domainName.${imageLvmPath:+lvm.}$imageType.$imageFormat"}"
-if [ "$domainIp" ] && [ ! "$domainGateway" ]; then
-    domainGateway="${domainIp%.*}.1"
-fi
-if [ "$domainIp" ] && [ ! "$networkIpRange" ]; then
-    networkIpRange="${domainIp%.*}"
-fi
-if [ ! "$networkIpRange" ]; then
-    networkIpRange=192.168.100
-fi
+networkIp4Net="${networkIp4Net:-"$domainIp4"}"
+networkIp6Net="${networkIp6Net:-"$domainIp6"}"
 
 # Paths
 serial="$(date --date "$debianTimestamp" +%Y%m%d)"
@@ -208,7 +213,7 @@ image="$imageDir/$imageName.${imageLvmPath:+lvm.}$imageType.$imageFormat"
 
 if [ ! -f "$rootfs" ]; then
     buildArgs=(
-        --arch "$debianArch"
+        --arch      "$debianArch"
         --timestamp "$debianTimestamp"
         --libvirt
     )
@@ -221,11 +226,12 @@ fi
 #------------------------------------------------------------------------------
 
 networkArgs=(
-    --uuid "$networkUuid"
-    --mac "$networkMac"
-    --ip-range "$networkIpRange"
+    --uuid    "$networkUuid"
+    --mac     "$networkMac"
     --xml-dir "$xmlDir"
 )
+[ "$networkIp4Net" ] && networkArgs+=( --ip4-net "$networkIp4Net" )
+[ "$networkIp6Net" ] && networkArgs+=( --ip6-net "$networkIp6Net" )
 "$libvirtDir/create_network.sh" "${networkArgs[@]}" "$networkName"
 
 
@@ -244,10 +250,10 @@ poolArgs=(
 #------------------------------------------------------------------------------
 
 imageArgs=(
-    --format "$imageFormat"
-    --size "$imageSize"
-    --lvm-path "$imageLvmPath"
-    --type "$imageType"
+    --format    "$imageFormat"
+    --size      "$imageSize"
+    --lvm-path  "$imageLvmPath"
+    --type      "$imageType"
     --image-dir "$imageDir"
 )
 "$libvirtDir/create_image.sh" "${imageArgs[@]}" "$rootfs" "$imageName"
@@ -268,18 +274,20 @@ volumeArgs=(
 #------------------------------------------------------------------------------
 
 domainArgs=(
-    --cpus "$domainCpus"
-    --memory "$domainMemory"
+    --cpus       "$domainCpus"
+    --memory     "$domainMemory"
     --os-variant "$domainOsVariant"
-    --hostname "$domainHostname"
-    --password "$domainPassword"
-    --ssh-key "$domainSshKey"
-    --timezone "$domainTimezone"
-    --keyboard "$domainKeyboard"
-    --interface "$domainInterface"
-    --ip "$domainIp"
-    --gateway "$domainGateway"
+    --hostname   "$domainHostname"
+    --password   "$domainPassword"
+    --ssh-key    "$domainSshKey"
+    --timezone   "$domainTimezone"
+    --keyboard   "$domainKeyboard"
+    --interface  "$domainInterface"
 )
+[ "$domainIp4" ] && domainArgs+=( --ip4 "$domainIp4")
+[ "$domainIp4Gateway" ] && domainArgs+=( --ip4Gateway "$domainIp4Gateway")
+[ "$domainIp6" ] && domainArgs+=( --ip6 "$domainIp6")
+[ "$domainIp6Gateway" ] && domainArgs+=( --ip6Gateway "$domainIp6Gateway")
 [ "$domainSshdKeys" ] && domainArgs+=( --sshd-keys "$domainSshdKeys" )
 "$libvirtDir/create_domain.sh" "${domainArgs[@]}" \
     "$domainName" "$networkName" "$poolName" "$volumeName"

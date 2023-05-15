@@ -347,7 +347,10 @@ Requirements
 - `libvirt`_
 - `virt-manager`_
 - `libguestfs-tools`_
+- `sipcalc`_
 - `ansible`_
+
+.. _sipcalc: http://www.routemeister.net/projects/sipcalc/
 
 Install requirements
 
@@ -361,6 +364,7 @@ Install requirements
           libvirt-daemon-system qemu-system \
           virt-manager virt-viewer virtinst \
           libguestfs-tools \
+          sipcalc \
           ansible
 
 - Archlinux
@@ -372,6 +376,7 @@ Install requirements
           libvirt qemu-base iptables-nft dnsmasq dmidecode openbsd-netcat \
           virt-manager virt-viewer \
           libguestfs guestfs-tools \
+          sipcalc \
           ansible
 
 Checkout this repo and subrepos

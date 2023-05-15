@@ -7,8 +7,8 @@
 #%   Builds a debian libvirt domain and provisions it with ansible.
 #%
 #% Arguments:
-#%   domain:            name of the domain
-#%   ip:                ip of the domain
+#%   domain:            name of the domain (e.g. domain.test)
+#%   ip:                ipv4 of the domain (with cidr, e.g. 192.168.100.10/24)
 #%
 #% Options:
 #%   -s, --suite=SUITE  codename of debian version (default: 'bookworm')
@@ -47,8 +47,6 @@ sshdKeys="$libvirtDir/ssh"
 pool="develop"
 
 # Interface
-ipRange="${ip%.*}"
-gateway="${ip%.*}.1"
 interface="static"
 
 # Ansible
@@ -62,13 +60,12 @@ export ANSIBLE_CONFIG="$ansibleDir/ansible.cfg"
 if ! virsh dominfo "$domain" &> /dev/null; then
     buildArgs=(
         --network-name     "$network"
-        --network-ip-range "$ipRange"
+        --network-ip4-net  "$ip"
         --pool-name        "$pool"
         --domain-name      "$domain"
         --domain-sshd-keys "$sshdKeys"
         --domain-interface "$interface"
-        --domain-ip        "$ip"
-        --domain-gateway   "$gateway"
+        --domain-ip4       "$ip"
     )
     "$libvirtDir/build.sh" "${buildArgs[@]}" "$suite"
 fi
@@ -109,7 +106,7 @@ success
 
 title "Wait for ssh connectivity"
 echo -n "  ..."
-while ! ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=5 $ip 'exit 0'; do
+while ! ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=5 ${ip%/*} 'exit 0'; do
     echo -n "."
     sleep 1
 done;
