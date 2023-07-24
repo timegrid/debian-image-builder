@@ -125,7 +125,7 @@ ansibleDir="${ANSIBLE_DIR:-"$projectDir/scripts/ansible"}"
 
 # Application
 debianArch="${DEBIAN_ARCH:-amd64}"
-debianTimestamp="${DEBIAN_TIMESTAMP:-2023-04-26T00:00:00Z}"
+debianTimestamp="${DEBIAN_TIMESTAMP:-2023-06-20T00:00:00Z}"
 declare -A debianVersions=(
     [woody]=3
     [etch]=4
