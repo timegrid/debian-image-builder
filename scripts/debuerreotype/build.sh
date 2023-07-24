@@ -109,6 +109,11 @@ libvirtInclude=(
     python3
     python-is-python3
     dbus
+
+    # --- ansible initial check mode
+    git
+    python3-apt
+    python3-setuptools
 )
 libvirtInclude+=(${include//,/ })
 libvirtExclude=()
