@@ -207,6 +207,8 @@ else
          "host settings: timezone, hostname" \
          "root access: password, ssh" \
          "network configuration" \
+         "setting machine-id" \
+         "update apt" \
          "update sshd keys" \
          "update bootloader after lvm id has changed"
     info "timezone" "$timezone"
@@ -243,8 +245,10 @@ else
     # execute
     virt-sysprep -d "$name" "${prepareArgs[@]}"
 
-    # update bootloader after lvm id has changed
     customizeArgs=(
+        # update apt
+        --run-command "apt-get update"
+        # update bootloader after lvm id has changed
         --run-command "grub-install /dev/sda"
         --run-command "update-grub2"
     )
