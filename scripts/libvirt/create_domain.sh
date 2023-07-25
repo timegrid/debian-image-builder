@@ -109,7 +109,7 @@ volume="${1:-}"; shift || usage "missing argument: volume" 1
 # Defaults
 hostname="${hostname:-"$name"}"
 [ "$ip4" ] && ip4Gateway="${ip4Gateway:-"${ip4%.*}.1"}"
-[ "$ip6" ] && ip6Gateway="${ip6Gateway:-"${ip6%:*}:1"}"
+[ "$ip6" ] && ip6Gateway="${ip6Gateway:-"fe80::"}"
 
 # Switches
 created=false
