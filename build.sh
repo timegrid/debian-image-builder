@@ -11,7 +11,7 @@
 #%   ip:                ipv4 of the domain (with cidr, e.g. 192.168.100.10/24)
 #%
 #% Options:
-#%   -s, --suite=SUITE  codename of debian version (default: 'bookworm')
+#%   -s, --suite=SUITE  codename of debian version
 
 set -eu
 
@@ -25,9 +25,10 @@ source "$scriptDir/.project.sh" \
 aptcacherngDir="$aptcacherngDir"
 libvirtDir="$libvirtDir"
 ansibleDir="$ansibleDir"
+debianDefault="$debianDefault"
 
 # Options
-suite="bookworm"
+suite="$debianDefault"
 while true; do
     case "$1" in
        -s | --suite) suite="$2" ; shift 2 ;;

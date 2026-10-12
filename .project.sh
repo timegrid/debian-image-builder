@@ -125,7 +125,8 @@ ansibleDir="${ANSIBLE_DIR:-"$projectDir/scripts/ansible"}"
 
 # Application
 debianArch="${DEBIAN_ARCH:-amd64}"
-debianTimestamp="${DEBIAN_TIMESTAMP:-2023-06-20T00:00:00Z}"
+debianTimestamp="${DEBIAN_TIMESTAMP:-2026-10-03T00:00:00Z}"
+debianDefault="trixie"
 declare -A debianVersions=(
     [woody]=3
     [etch]=4
@@ -137,6 +138,7 @@ declare -A debianVersions=(
     [buster]=10
     [bullseye]=11
     [bookworm]=12
+    [trixie]=13
 )
 
 # Calculate shasum of stdin input
