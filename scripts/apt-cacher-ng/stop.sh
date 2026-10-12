@@ -27,6 +27,6 @@ if [ -z "$(docker ps -f "name=apt-cacher-ng" -f "status=running" -q)" ]; then
     info "service not running"
 else
     docker stop apt-cacher-ng > /dev/null
-    docker remove apt-cacher-ng > /dev/null
 fi
+docker rm apt-cacher-ng &> /dev/null
 success
