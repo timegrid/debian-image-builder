@@ -7,7 +7,7 @@
 #%   Builds an apt-cacher-ng docker image.
 #%
 #% Options:
-#%   -b, --base-image=NAME  base image (default: debian:bullseye-slim)
+#%   -b, --base-image=NAME  base image
 #%
 #%   -h, --help              display this help
 #%       --colorless         omit colors
@@ -19,9 +19,10 @@ scriptDir="$(dirname "$(readlink -vf "$0")")"
 source "$scriptDir/.project.sh" \
        --short "b:" --long  "base-image:" -- "$@"
 aptcacherngDir="$aptcacherngDir"
+debianDefault="$debianDefault"
 
 # Options
-baseImage=debian:bullseye-slim
+baseImage=debian:$debianDefault-slim
 while true; do
     case "$1" in
        -b | --base-image)  baseImage="$2" ; shift 2 ;;
