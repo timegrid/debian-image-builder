@@ -77,8 +77,9 @@
 #%   debianArch              architecture of debian builds (default: amd64)
 #%                             envvar: DEBIAN_ARCH
 #%   debianTimestamp         default timestamp for debian snapshots
-#%                             (default: 2023-04-26T00:00:00Z)
+#%                             (default: 2026-10-03T00:00:00Z)
 #%                             envvar: DEBIAN_TIMESTAMP
+#%   debianDefault           default debian codename: trixie
 #%   debianVersions          associative array of debian codenames to version
 #%
 #% Application Functions:

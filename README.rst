@@ -606,7 +606,7 @@ Update
 
 To update this repo (e.g. after new suite 'trixie' was released):
 
-1. Adjust variables in ``.project.sh``::
+1. Adjust variables and usage in ``.project.sh``::
 
     # change to current date
     debianTimestamp="${DEBIAN_TIMESTAMP:-2026-10-03T00:00:00Z}"
