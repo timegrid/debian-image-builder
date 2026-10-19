@@ -109,6 +109,7 @@ libvirtInclude=(
     python3
     python-is-python3
     dbus
+    ssh-askpass
 
     # --- ansible initial check mode
     git
