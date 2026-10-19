@@ -1,6 +1,6 @@
 # IPv4
 127.0.0.1	localhost
-{{ system_public_ipv4 }}	{{ ansible_fqdn }} {{ ansible_hostname }}
+{{ system_public_ipv4 }}	{{ ansible_facts['fqdn'] }} {{ ansible_facts['hostname'] }}
 {% if system_fqdn_aliases is defined and (system_fqdn_aliases | length > 0) %}
 {% for alias in system_fqdn_aliases %}
 {{ system_public_ipv4 }}	{{ alias }}

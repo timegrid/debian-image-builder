@@ -2,9 +2,9 @@
 system_stage: "development"
 
 system_hostname: "{{ inventory_hostname }}"
-system_public_ipv4: "{{ ansible_default_ipv4.address }}"
+system_public_ipv4: "{{ ansible_facts['default_ipv4'].address }}"
 system_public_ipv4_gateway: "{{ system_public_ipv4.split('.')[0:3] | join('.') }}.1"
-system_fqdn: "{{ ansible_fqdn }}"
+system_fqdn: "{{ ansible_facts['fqdn'] }}"
 system_fqdn_aliases: []
 
 system_lang: en_US.UTF-8

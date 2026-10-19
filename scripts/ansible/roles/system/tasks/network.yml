@@ -22,8 +22,8 @@
   when: configure_interfaces_output.changed
 
 - name: wait for ssh connectivity
-  local_action:
-    module: wait_for
+  local_action: wait_for
+  args:
     host: "{{ ansible_host }}"
     port: 22
     delay: 10

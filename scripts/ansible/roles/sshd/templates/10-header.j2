@@ -3,7 +3,7 @@
 import os
 
 
-hostname = "{{ ansible_hostname }}"
+hostname = "{{ ansible_facts['hostname'] }}"
 quoted = hostname.title()
 filename_logo = "/etc/motd.logo"
 filename_stage = "/etc/stage"
