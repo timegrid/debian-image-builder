@@ -393,6 +393,8 @@ Add the hosts to ``/etc/hosts``, e.g. for the test scripts
     192.168.100.111		bullseye-ansible.test
     192.168.100.102		bookworm-libvirt.test
     192.168.100.112		bookworm-ansible.test
+    192.168.100.103		trixie-libvirt.test
+    192.168.100.113		trixie-ansible.test
 
 Add the ssh key (no passphrase) to your ssh agent
 ::
@@ -407,7 +409,13 @@ If you use a firewall, adjust the rules for the vm network, e.g. nftables
         [...]
 
         # libvirt
-        iifname "virbr-*" ip saddr 192.168.100.0/24 ip daddr 192.168.100.1 \
+        iifname "virbr-*" ip saddr 192.168.0.0/16 ip daddr 192.168.100.1 \
+            accept comment "allow libvirt host communication"
+        iifname "virbr-*" ip saddr 192.168.0.0/16 ip daddr 192.168.101.1 \
+            accept comment "allow libvirt host communication"
+        iifname "virbr-*" ip saddr 10.0.0.0/8 ip daddr 10.63.215.1 \
+            accept comment "allow libvirt host communication"
+        iifname "virbr-*" ip6 saddr fe80::/10 ip6 daddr fe80::/10 \
             accept comment "allow libvirt host communication"
         iifname "virbr-*" ip protocol udp ip saddr 0.0.0.0 ip daddr 255.255.255.255 \
             accept comment "allow libvirt dns broadcast"
@@ -427,17 +435,25 @@ If you use a firewall, adjust the rules for the vm network, e.g. nftables
             accept comment "allow docker internet commmunication in"
 
         # libvirt
-        ip saddr 192.168.100.0/24 ip daddr 192.168.100.0/24 \
-            accept comment "allow libvirt subnet communication"
-        iifname "virbr-*" ip saddr 192.168.100.0/24 \
+        ip saddr 192.168.100.0/24 ip daddr 192.168.0.0/16 \
+        accept comment "allow libvirt subnet communication"
+        iifname "virbr-*" ip saddr 192.168.0.0/16 \
             accept comment "allow libvirt communication out"
-        oifname "virbr-*" ip daddr 192.168.100.0/24 \
+        oifname "virbr-*" ip daddr 192.168.0.0/16 \
+            accept comment "allow libvirt communication in"
+        iifname "virbr-*" ip saddr 10.0.0.0/8 \
+            accept comment "allow libvirt communication out"
+        oifname "virbr-*" ip daddr 10.0.0.0/8 \
             accept comment "allow libvirt communication in"
 
         [...]
         # log
     }
 
+*Note: Docker might need to be configured to use the currently experimental native
+``nftables`` firewall backend*, see e.g. `here`__
+
+__ https://kofler.info/docker-mit-nft-ausprobiert/
 
 Build HTML documentation including the synopsis of the scripts (``--help``)
 ::
@@ -452,16 +468,16 @@ Usage
 docker
 ''''''
 
-Build and run a bookworm docker image ``debian:bookworm-slim`` via test script
+Build and run a trixie docker image ``debian:trixie-slim`` via test script
 ::
 
-    ./tests/bookworm-docker.sh
+    ./tests/trixie-docker.sh
 
-Build and run a custom bookworm docker image ``my-bookworm``
+Build and run a custom trixie docker image ``my-trixie``
 ::
 
-    ./scripts/docker/build.sh bookworm my-bookworm
-    docker run --rm -it my-bookworm bash
+    ./scripts/docker/build.sh trixie my-trixie
+    docker run --rm -it my-trixie bash
 
 libvirt
 '''''''
@@ -469,18 +485,18 @@ libvirt
 *Note: By default a libvirt network "debian" in range 192.168.100.0/24
 and interface "virt-debian" are created.*
 
-Build and run a minimal bookworm libvirt VM ``bookworm-libvirt.test``
+Build and run a minimal trixie libvirt VM ``trixie-libvirt.test``
 on ``192.168.100.102`` via test script
 ::
 
-    ./tests/bookworm-libvirt.sh
+    ./tests/trixie-libvirt.sh
 
-Build and run a custom minimal bookworm libvirt VM ``my-bookworm-libvirt.test`` on dhcp:
+Build and run a custom minimal trixie libvirt VM ``my-trixie-libvirt.test`` on dhcp:
 
 1. Run the build script
    ::
 
-        ./scripts/libvirt/build.sh --domain-name my-bookworm-libvirt.test bookworm
+        ./scripts/libvirt/build.sh --domain-name my-trixie-libvirt.test trixie
 
 2. Fetch the IP of the VM
    ::
@@ -490,15 +506,15 @@ Build and run a custom minimal bookworm libvirt VM ``my-bookworm-libvirt.test`` 
 3. Connect to the VM
    ::
 
-        ssh root@<IP>
+        ssh  root@<IP>
 
 4. Delete the VM
    ::
 
-        virsh destroy my-bookworm-libvirt.test
-        virsh undefine my-bookworm-libvirt.test
-        rm ./scripts/libvirt/image/my-bookworm-libvirt.test.lvm.ext4.qcow2
-        rm ./scripts/libvirt/pool/develop/my-bookworm-libvirt.test.lvm.ext4.qcow2
+        virsh destroy my-trixie-libvirt.test
+        virsh undefine my-trixie-libvirt.test
+        rm ./scripts/libvirt/image/my-trixie-libvirt.test.lvm.ext4.qcow2
+        rm ./scripts/libvirt/pool/develop/my-trixie-libvirt.test.lvm.ext4.qcow2
 
 ansible
 '''''''
@@ -506,46 +522,46 @@ ansible
 *Note: By default a libvirt network "debian" in range 192.168.100.0/24
 and interface "virt-debian" are created.*
 
-Build and run an ansible provisioned bookworm libvirt VM ``bookworm-ansible.test``
+Build and run an ansible provisioned trixie libvirt VM ``trixie-ansible.test``
 on ``192.168.100.112`` via test script
 ::
 
-    ./examples/bookworm-ansible.sh
+    ./examples/trixie-ansible.sh
 
-Build and run a custom ansible provisioned bookworm libvirt VM ``my-bookworm-ansible.test``
+Build and run a custom ansible provisioned trixie libvirt VM ``my-trixie-ansible.test``
 on ``192.168.100.50``:
 
 1. Add the host to ``/etc/hosts``
    ::
 
         # debian image builder
-        192.168.100.50		my-bookworm-ansible.test
+        192.168.100.50		my-trixie-ansible.test
 
 2. Run the build script
    ::
 
-        ./build.sh --suite bookworm my-bookworm-ansible.test 192.168.100.50
+        ./build.sh --suite trixie my-trixie-ansible.test 192.168.100.50
 
 3. Connect to the VM
    ::
 
-        ssh admin@my-bookworm-ansible.test
-        ssh root@my-bookworm-ansible.test
+        ssh admin@my-trixie-ansible.test
+        ssh root@my-trixie-ansible.test
 
 4. Delete the VM
    ::
 
-        virsh destroy my-bookworm-ansible.test
-        virsh undefine my-bookworm-ansible.test
-        rm ./scripts/libvirt/image/my-bookworm-ansible.test.lvm.ext4.qcow2
-        rm ./scripts/libvirt/pool/develop/my-bookworm-ansible.test.lvm.ext4.qcow2
+        virsh destroy my-trixie-ansible.test
+        virsh undefine my-trixie-ansible.test
+        rm ./scripts/libvirt/image/my-trixie-ansible.test.lvm.ext4.qcow2
+        rm ./scripts/libvirt/pool/develop/my-trixie-ansible.test.lvm.ext4.qcow2
 
 Manually run the ansible playbook
 ::
 
     ansible-playbook \
         --timeout 100 \
-        --inventory my-bookworm-ansible.test, \
+        --inventory my-trixie-ansible.test, \
         --user root \
         --tags setup \
         scripts/ansible/debian.yml
@@ -555,7 +571,7 @@ Manually run a system upgrade via the ansible playbook
 
     ansible-playbook \
         --timeout 100 \
-        --inventory my-bookworm-ansible.test, \
+        --inventory my-trixie-ansible.test, \
         --user root \
         --tags upgrade \
         scripts/ansible/debian.yml
@@ -583,6 +599,231 @@ Scripts
 -------
 
 .. include:: docs/usages.rst
+
+
+Update
+------
+
+To update this repo (e.g. after new suite 'trixie' was released):
+
+1. Adjust variables in ``.project.sh``::
+
+    # change to current date
+    debianTimestamp="${DEBIAN_TIMESTAMP:-2026-10-03T00:00:00Z}"
+
+    # change to current stable suite
+    debianDefault="trixie"
+
+    # add new suite/version
+    declare -A debianVersions=(
+        [...]
+        [trixie]=13
+    )
+
+2. Update ``debootstrap``
+
+  1. Update keyring and pin files (``.dsc``, ``.sha512``, ``.gpg``)
+
+    1. Change into the keyring dir
+       ::
+
+        cd scripts/debootstrap/keyrings
+
+    2. Check keyring version for new suite
+       ::
+
+        suite=trixie
+
+        src="https://sources.debian.org/api/src/debian-archive-keyring/"
+        wget -O debian-archive-keyring.$suite.sources.json "$src?suite=$suite"
+        cat debian-archive-keyring.$suite.sources.json
+            # [...]
+            #   "version": "2025.1",
+            # [...]
+
+        version="2025.1"
+
+    3. Download keyring package tarball and dsc (from `debian`__)::
+
+        ftp='https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/'
+        wget $ftp/debian-archive-keyring_$version.tar.xz
+        wget $ftp/debian-archive-keyring_$version.dsc
+
+    __ https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/
+
+    4. Verify gpg signature of dsc with last pinned key (in clean gnupghome)::
+
+        export GNUPGHOME=/tmp/dib-$suite
+        mkdir $GNUPGHOME; chmod go-rwx $GNUPGHOME
+        gpg --import debian-archive-keyring_*.gpg
+        gpg --verify debian-archive-keyring_$version.dsc
+            # [...]
+            # gpg: Good signature from [...]
+            # [...]
+
+    5. Verify checksum of tarball in dsc file::
+
+        echo $(grep -zoP "(?<=Sha256:\n ).*?(?= )" \
+                         debian-archive-keyring_$version.dsc) \
+             debian-archive-keyring_$version.tar.xz | sha256sum -c
+
+    6. Generate new pinned sha512 file::
+
+        sha512sum debian-archive-keyring_$version.tar.xz \
+            > debian-archive-keyring_$version.tar.xz.sha512
+
+    7. Refresh, reverify and export updated gpg key::
+
+        gpg --verify debian-archive-keyring_$version.dsc
+            # [...]
+            # Primary key fingerprint:
+            #   CA61 9D65 A72A 7BAD FC96  D280 1964 18AA EB74 C8A1
+            # [...]
+        gpg --refresh CA619D65A72A7BADFC96D280196418AAEB74C8A1
+        gpg --verify debian-archive-keyring_$version.dsc
+        gpg --export --armor CA619D65A72A7BADFC96D280196418AAEB74C8A1 \
+            > debian-archive-keyring_$version.gpg
+
+    8. Add pinned files (dsc, sha512, gpg)::
+
+        git add *.dsc *.sha512 *.gpg
+
+  2. Update ``debootstrap`` upstream
+
+    1. Check `upstream repo`__:
+
+      - Check release notes
+      - Check release key
+
+    __ https://salsa.debian.org/installer-team/debootstrap
+
+    2. Change into ``debootstrap`` upstream dir::
+
+        cd scripts/debootstrap/upstream
+
+    3. Verify newest tag signature::
+
+        tag="1.0.145"
+
+        git pull
+        export GNUPGHOME=/tmp/dib-$suite
+        mkdir $GNUPGHOME; chmod go-rwx $GNUPGHOME
+        gpg --import ../keyrings/debootstrap-bluca.gpg
+        gpg verify-tag $tag
+            # [...]
+            # gpg: Good signature from [...]
+            # [...]
+
+    4. Update to newest tag::
+
+        git checkout $tag
+
+  3. Build the ``debootstrap`` rootfs
+
+    1. Change into debootstrap dir::
+
+        cd scripts/debootstrap
+
+    2. Build old and new suite::
+
+        rm -rf build/bookworm
+        sudo ./build.sh bookworm
+        sudo ./build.sh trixie
+
+  4. Commit the changes
+
+3. Update ``debuerrotype``
+
+    1. Update ``debuerreotype`` upstream
+
+        1. Check `upstream repo`__:
+
+          - check release notes
+          - check diff
+
+        __ https://github.com/debuerreotype/debuerreotype
+
+        2. Update to newest tag::
+
+            tag="0.17"
+
+            cd scripts/debuerreotype/upstream
+            git pull
+            git checkout $tag
+
+    2. Run clean scripts (apt-cacher-ng, debuerreotype)::
+
+        ./scripts/apt-cacher-ng/clean.sh
+        ./scripts/debuerreotype/clean.sh
+
+    3. Bootstrap the docker image::
+
+        ./scripts/debuerreotype/bootstrap.sh
+
+    4. Build old and new docker image::
+
+        ./scripts/debuerreotype/build.sh bookworm
+        ./scripts/debuerreotype/build.sh trixie
+
+    5. Commit the changes
+
+4. Add new ``tests``
+
+    1. Copy and adjust test scripts::
+
+        cd tests
+        cp bookworm-docker.sh trixie-docker.sh
+            # suite="trixie"
+            # image="debian:trixie-slim"
+        cp bookworm-libvirt.sh trixie-libvirt.sh
+            # suite=trixie
+            # domain=trixie-ansible.test
+            # ip="192.168.100.103/24"
+        cp bookworm-ansible.sh trixie-ansible.sh
+            # domain=trixie-ansible.test
+            # suite=trixie
+            # ip="192.168.100.113/24"
+
+    2. Add test domains in ``scripts/libvirt/clean.sh``::
+
+        domains=(
+            [...]
+            trixie-ansible.test
+            trixie-libvirt.test
+        )
+
+5. Test ``docker``
+
+    1. Run old and new test script::
+
+        sudo ./tests/bookworm-docker.sh
+        sudo ./tests/trixie-docker.sh
+
+    2. Add fixes if neccessary and commit the changes
+
+6. Test ``libvirt``
+
+    1. Run clean script::
+
+        sudo ./scripts/libvirt/clean.sh
+
+    2. Run old and new test script::
+
+        sudo ./tests/bookworm-libvirt.sh
+        sudo ./tests/trixie-libvirt.sh
+
+    3. Add fixes if neccessary and commit the changes
+
+7. Test ``ansible``
+
+    1. Run old and new test script::
+
+        sudo ./tests/bookworm-ansible.sh
+        sudo ./tests/trixie-ansible.sh
+
+    2. Add fixes if neccessary and commit the changes
+
+8. Update examples in ``README.rst``
 
 
 License
@@ -721,33 +962,33 @@ Usage
 
 *Note: For a list of all arguments/flags, execute the scripts with the ``--help`` flag.*
 
-Minimal example run on host to build a current snapshot bookworm
+Minimal example run on host to build a current snapshot trixie
 ::
 
-    debuerreotype-init /tmp/rootfs bookworm now
-    debuerreotype-debian-sources-list /tmp/rootfs bookworm
+    debuerreotype-init /tmp/rootfs trixie now
+    debuerreotype-debian-sources-list /tmp/rootfs trixie
     debuerreotype-tar /tmp/rootfs rootfs.tar.gz
 
-Minimal example run on host to build a certain snapshot of bookworm
+Minimal example run on host to build a certain snapshot of trixie
 ::
 
-    debuerreotype-init /tmp/rootfs bookworm 2023-03-01T00:00:00Z
-    debuerreotype-debian-sources-list /tmp/rootfs bookworm
+    debuerreotype-init /tmp/rootfs trixie 2023-03-01T00:00:00Z
+    debuerreotype-debian-sources-list /tmp/rootfs trixie
     debuerreotype-tar /tmp/rootfs rootfs.tar.gz
 
-Minimal example run on host to build a non-snapshot bookworm
+Minimal example run on host to build a non-snapshot trixie
 ::
 
-    debuerreotype-init --non-debian /tmp/rootfs bookworm http://debian.org/debian
-    debuerreotype-debian-sources-list /tmp/rootfs bookworm
+    debuerreotype-init --non-debian /tmp/rootfs trixie http://debian.org/debian
+    debuerreotype-debian-sources-list /tmp/rootfs trixie
     debuerreotype-tar /tmp/rootfs rootfs.tar.gz
 
-Minimal snapshot example run in docker to build a specific snaphot of bookworm
+Minimal snapshot example run in docker to build a specific snaphot of trixie
 ::
 
     ./docker-run.sh sh -euxc "
-        debuerreotype-init /tmp/rootfs bookworm 2023-03-01T00:00:00Z;
-        debuerreotype-debian-sources-list /tmp/rootfs bookworm;
+        debuerreotype-init /tmp/rootfs trixie 2023-03-01T00:00:00Z;
+        debuerreotype-debian-sources-list /tmp/rootfs trixie;
         debuerreotype-tar /tmp/rootfs rootfs.tar.xz
     "
 
@@ -755,7 +996,7 @@ Execution of debian example file in docker
 ::
 
     ./docker-run.sh sh -euxc "
-        ./debuerreotype/examples/debian.sh builds bookworm 2023-03-01T00:00:00Z
+        ./debuerreotype/examples/debian.sh builds trixie 2023-03-01T00:00:00Z
     "
 
 The gist of the debian example file
@@ -789,7 +1030,7 @@ Export
 Export into docker
 ::
 
-    xz -cd rootfs.tar.gz | docker import - debian:bookworm-slim
+    xz -cd rootfs.tar.gz | docker import - debian:trixie-slim
 
 Export into qcow2
 ::
@@ -821,7 +1062,7 @@ Verify checksums
   ::
 
       docker image inspect --format "{{index (.RootFS.Layers) 0}}" \
-          debian:bookworm-slim
+          debian:trixie-slim
 
 - vm filesystem -> tar
   ::
@@ -1339,7 +1580,7 @@ virt-install
         debian11
         # fetch via
         # $osinfo-query os --fields=short-id \
-        #     vendor="Debian Project" codename="bookworm"
+        #     vendor="Debian Project" codename="trixie"
     --initrd-inject=FILE
         preseed.cfg
     --extra-args=KERNELOPTIONS

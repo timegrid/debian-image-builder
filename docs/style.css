@@ -284,6 +284,10 @@ table caption {
 
 /* ========== Lists ========== */
 
+ol {
+    padding-left:25px;
+}
+
 ol.simple, ul.simple {
     margin-bottom: 1em;
 }
@@ -581,6 +585,9 @@ margin-left: 50% }
 
 blockquote.epigraph {
     margin: 2em 5em;
+}
+blockquote {
+    margin-right: 0;
 }
 
 div.abstract {
