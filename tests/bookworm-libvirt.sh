@@ -116,7 +116,7 @@ title "Connect to the libvirt domain via ssh"
 if $dhcp; then
     ip="$(virsh net-dhcp-leases "$network" | grep -oP "(\d{1,3}\.){3}\d{1,3}(?=.*$domain)")"
 fi
-ssh "root@${ip%/*}"
+ssh -i $libvirtDir/ssh/libvirtlocal "root@${ip%/*}"
 
 
 #------------------------------------------------------------------------------
