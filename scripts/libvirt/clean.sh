@@ -29,6 +29,8 @@ domains=(
     bullseye-libvirt.test
     bookworm-ansible.test
     bookworm-libvirt.test
+    trixie-ansible.test
+    trixie-libvirt.test
 )
 
 # Paths
