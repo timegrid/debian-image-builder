@@ -21,5 +21,5 @@
                  | first }}"
 
 - name: configure locale
-  command: localectl set-locale LANG={{ system_lang }}
+  command: update-locale LANG={{ system_lang }}
   changed_when: locale_lang != system_lang
