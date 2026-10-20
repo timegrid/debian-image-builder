@@ -622,206 +622,226 @@ To update this repo (e.g. after new suite 'trixie' was released):
 
 2. Update ``debootstrap``
 
-  1. Update keyring and pin files (``.dsc``, ``.sha512``, ``.gpg``)
+   1. Update keyring and pin files (``.dsc``, ``.sha512``, ``.gpg``)
 
-    1. Change into the keyring dir
-       ::
+      1. Change into the keyring dir
+         ::
 
-        cd scripts/debootstrap/keyrings
+          cd scripts/debootstrap/keyrings
 
-    2. Check keyring version for new suite
-       ::
+      2. Check keyring version for new suite
+         ::
 
-        suite=trixie
+          suite=trixie
 
-        src="https://sources.debian.org/api/src/debian-archive-keyring/"
-        wget -O debian-archive-keyring.$suite.sources.json "$src?suite=$suite"
-        cat debian-archive-keyring.$suite.sources.json
-            # [...]
-            #   "version": "2025.1",
-            # [...]
+          src="https://sources.debian.org/api/src/debian-archive-keyring/"
+          wget -O debian-archive-keyring.$suite.sources.json "$src?suite=$suite"
+          cat debian-archive-keyring.$suite.sources.json
+              # [...]
+              #   "version": "2025.1",
+              # [...]
 
-        version="2025.1"
+          version="2025.1"
 
-    3. Download keyring package tarball and dsc (from `debian`__)::
+      3. Download keyring package tarball and dsc (from `debian`__)
+         ::
 
-        ftp='https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/'
-        wget $ftp/debian-archive-keyring_$version.tar.xz
-        wget $ftp/debian-archive-keyring_$version.dsc
+          ftp='https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/'
+          wget $ftp/debian-archive-keyring_$version.tar.xz
+          wget $ftp/debian-archive-keyring_$version.dsc
 
-    __ https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/
+      __ https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/
 
-    4. Verify gpg signature of dsc with last pinned key (in clean gnupghome)::
+      4. Verify gpg signature of dsc with last pinned key (in clean gnupghome)
+         ::
 
-        export GNUPGHOME=/tmp/dib-$suite
-        mkdir $GNUPGHOME; chmod go-rwx $GNUPGHOME
-        gpg --import debian-archive-keyring_*.gpg
-        gpg --verify debian-archive-keyring_$version.dsc
-            # [...]
-            # gpg: Good signature from [...]
-            # [...]
+          export GNUPGHOME=/tmp/dib-$suite
+          mkdir $GNUPGHOME; chmod go-rwx $GNUPGHOME
+          gpg --import debian-archive-keyring_*.gpg
+          gpg --verify debian-archive-keyring_$version.dsc
+              # [...]
+              # gpg: Good signature from [...]
+              # [...]
 
-    5. Verify checksum of tarball in dsc file::
+      5. Verify checksum of tarball in dsc file
+         ::
 
-        echo $(grep -zoP "(?<=Sha256:\n ).*?(?= )" \
-                         debian-archive-keyring_$version.dsc) \
-             debian-archive-keyring_$version.tar.xz | sha256sum -c
+          echo $(grep -zoP "(?<=Sha256:\n ).*?(?= )" \
+                           debian-archive-keyring_$version.dsc) \
+               debian-archive-keyring_$version.tar.xz | sha256sum -c
 
-    6. Generate new pinned sha512 file::
+      6. Generate new pinned sha512 file
+         ::
 
-        sha512sum debian-archive-keyring_$version.tar.xz \
-            > debian-archive-keyring_$version.tar.xz.sha512
+          sha512sum debian-archive-keyring_$version.tar.xz \
+              > debian-archive-keyring_$version.tar.xz.sha512
 
-    7. Refresh, reverify and export updated gpg key::
+      7. Refresh, reverify and export updated gpg key
+         ::
 
-        gpg --verify debian-archive-keyring_$version.dsc
-            # [...]
-            # Primary key fingerprint:
-            #   CA61 9D65 A72A 7BAD FC96  D280 1964 18AA EB74 C8A1
-            # [...]
-        gpg --refresh CA619D65A72A7BADFC96D280196418AAEB74C8A1
-        gpg --verify debian-archive-keyring_$version.dsc
-        gpg --export --armor CA619D65A72A7BADFC96D280196418AAEB74C8A1 \
-            > debian-archive-keyring_$version.gpg
+          gpg --verify debian-archive-keyring_$version.dsc
+              # [...]
+              # Primary key fingerprint:
+              #   CA61 9D65 A72A 7BAD FC96  D280 1964 18AA EB74 C8A1
+              # [...]
+          gpg --refresh CA619D65A72A7BADFC96D280196418AAEB74C8A1
+          gpg --verify debian-archive-keyring_$version.dsc
+          gpg --export --armor CA619D65A72A7BADFC96D280196418AAEB74C8A1 \
+              > debian-archive-keyring_$version.gpg
 
-    8. Add pinned files (dsc, sha512, gpg)::
+      8. Add pinned files (dsc, sha512, gpg)
+         ::
 
-        git add *.dsc *.sha512 *.gpg
+          git add *.dsc *.sha512 *.gpg
 
-  2. Update ``debootstrap`` upstream
+   2. Update ``debootstrap`` upstream
 
-    1. Check `upstream repo`__:
+      1. Check `upstream repo`__:
 
-      - Check release notes
-      - Check release key
+         - Check release notes
+         - Check release key
 
-    __ https://salsa.debian.org/installer-team/debootstrap
+      __ https://salsa.debian.org/installer-team/debootstrap
 
-    2. Change into ``debootstrap`` upstream dir::
+      2. Change into ``debootstrap`` upstream dir
+         ::
 
-        cd scripts/debootstrap/upstream
+          cd scripts/debootstrap/upstream
 
-    3. Verify newest tag signature::
+      3. Verify newest tag signature
+         ::
 
-        tag="1.0.145"
+          tag="1.0.145"
 
-        git pull
-        export GNUPGHOME=/tmp/dib-$suite
-        mkdir $GNUPGHOME; chmod go-rwx $GNUPGHOME
-        gpg --import ../keyrings/debootstrap-bluca.gpg
-        gpg verify-tag $tag
-            # [...]
-            # gpg: Good signature from [...]
-            # [...]
+          git pull
+          export GNUPGHOME=/tmp/dib-$suite
+          mkdir $GNUPGHOME; chmod go-rwx $GNUPGHOME
+          gpg --import ../keyrings/debootstrap-bluca.gpg
+          gpg verify-tag $tag
+              # [...]
+              # gpg: Good signature from [...]
+              # [...]
 
-    4. Update to newest tag::
+      4. Update to newest tag
+         ::
 
-        git checkout $tag
+          git checkout $tag
 
-  3. Build the ``debootstrap`` rootfs
+   3. Build the ``debootstrap`` rootfs
 
-    1. Change into debootstrap dir::
+      1. Change into debootstrap dir
+         ::
 
-        cd scripts/debootstrap
+          cd scripts/debootstrap
 
-    2. Build old and new suite::
+      2. Build old and new suite
+         ::
 
-        rm -rf build/bookworm
-        sudo ./build.sh bookworm
-        sudo ./build.sh trixie
+          rm -rf build/bookworm
+          sudo ./build.sh bookworm
+          sudo ./build.sh trixie
 
-  4. Commit the changes
+   4. Commit the changes
 
 3. Update ``debuerrotype``
 
-    1. Update ``debuerreotype`` upstream
+   1. Update ``debuerreotype`` upstream
 
-        1. Check `upstream repo`__:
+      1. Check `upstream repo`__:
 
-          - check release notes
-          - check diff
+         - check release notes
+         - check diff
 
-        __ https://github.com/debuerreotype/debuerreotype
+      __ https://github.com/debuerreotype/debuerreotype
 
-        2. Update to newest tag::
+      2. Update to newest tag::
 
-            tag="0.17"
+          tag="0.17"
 
-            cd scripts/debuerreotype/upstream
-            git pull
-            git checkout $tag
+          cd scripts/debuerreotype/upstream
+          git pull
+          git checkout $tag
 
-    2. Run clean scripts (apt-cacher-ng, debuerreotype)::
+   2. Run clean scripts (apt-cacher-ng, debuerreotype)
+      ::
 
-        ./scripts/apt-cacher-ng/clean.sh
-        ./scripts/debuerreotype/clean.sh
+       ./scripts/apt-cacher-ng/clean.sh
+       ./scripts/debuerreotype/clean.sh
 
-    3. Bootstrap the docker image::
+   3. Bootstrap the docker image
+      ::
 
-        ./scripts/debuerreotype/bootstrap.sh
+       ./scripts/debuerreotype/bootstrap.sh
 
-    4. Build old and new docker image::
+   4. Build old and new docker image
+      ::
 
-        ./scripts/debuerreotype/build.sh bookworm
-        ./scripts/debuerreotype/build.sh trixie
+       ./scripts/debuerreotype/build.sh bookworm
+       ./scripts/debuerreotype/build.sh trixie
 
-    5. Commit the changes
+   5. Commit the changes
 
 4. Add new ``tests``
 
-    1. Copy and adjust test scripts::
+   1. Copy and adjust test scripts
+      ::
 
-        cd tests
-        cp bookworm-docker.sh trixie-docker.sh
-            # suite="trixie"
-            # image="debian:trixie-slim"
-        cp bookworm-libvirt.sh trixie-libvirt.sh
-            # suite=trixie
-            # domain=trixie-ansible.test
-            # ip="192.168.100.103/24"
-        cp bookworm-ansible.sh trixie-ansible.sh
-            # domain=trixie-ansible.test
-            # suite=trixie
-            # ip="192.168.100.113/24"
+       cd tests
+       cp bookworm-docker.sh trixie-docker.sh
+           # suite="trixie"
+           # image="debian:trixie-slim"
+       cp bookworm-libvirt.sh trixie-libvirt.sh
+           # suite=trixie
+           # domain=trixie-ansible.test
+           # ip="192.168.100.103/24"
+       cp bookworm-ansible.sh trixie-ansible.sh
+           # domain=trixie-ansible.test
+           # suite=trixie
+           # ip="192.168.100.113/24"
 
-    2. Add test domains in ``scripts/libvirt/clean.sh``::
+   2. Add test domains in ``scripts/libvirt/clean.sh``
+      ::
 
-        domains=(
-            [...]
-            trixie-ansible.test
-            trixie-libvirt.test
-        )
+       domains=(
+           [...]
+           trixie-ansible.test
+           trixie-libvirt.test
+       )
 
 5. Test ``docker``
 
-    1. Run old and new test script::
+   1. Run old and new test script
+      ::
 
-        sudo ./tests/bookworm-docker.sh
-        sudo ./tests/trixie-docker.sh
+       sudo ./tests/bookworm-docker.sh
+       sudo ./tests/trixie-docker.sh
 
-    2. Add fixes if neccessary and commit the changes
+   2. Add fixes if neccessary and commit the changes
 
 6. Test ``libvirt``
 
-    1. Run clean script::
+   1. Run clean script
+      ::
 
-        sudo ./scripts/libvirt/clean.sh
+       sudo ./scripts/libvirt/clean.sh
 
-    2. Run old and new test script::
+   2. Run old and new test script
+      ::
 
-        sudo ./tests/bookworm-libvirt.sh
-        sudo ./tests/trixie-libvirt.sh
+       sudo ./tests/bookworm-libvirt.sh
+       sudo ./tests/trixie-libvirt.sh
 
-    3. Add fixes if neccessary and commit the changes
+   3. Add fixes if neccessary and commit the changes
 
 7. Test ``ansible``
 
-    1. Run old and new test script::
+   1. Run old and new test script
+      ::
 
-        sudo ./tests/bookworm-ansible.sh
-        sudo ./tests/trixie-ansible.sh
+       sudo ./tests/bookworm-ansible.sh
+       sudo ./tests/trixie-ansible.sh
 
-    2. Add fixes if neccessary and commit the changes
+   2. Add fixes if neccessary and commit the changes
 
 8. Update examples in ``README.rst``
 
